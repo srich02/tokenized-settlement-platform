@@ -1,12 +1,19 @@
 {
   "name": "tokenized-settlement-platform",
   "version": "1.0.0",
-  "main": "index.js",
+  "private": true,
+  "description": "Tokenized Asset Settlement Platform - enterprise workflows with on-chain finality",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "npm run build --prefix backend && npm run build --prefix contracts && npm run build --prefix infra",
+    "build:backend": "npm run build --prefix backend",
+    "build:contracts": "npm run build --prefix contracts",
+    "build:infra": "npm run build --prefix infra",
+    "test": "npm test --prefix contracts",
+    "compile": "npm run compile --prefix contracts",
+    "deploy:cdk": "npm run build --prefix backend && npm run build --prefix infra && npm run cdk:synth --prefix infra && npm run cdk:deploy --prefix infra",
+    "cdk:diff": "npm run build --prefix backend && npm run cdk:diff --prefix infra"
   },
-  "keywords": [],
+  "keywords": ["web3", "settlement", "blockchain", "enterprise"],
   "author": "",
-  "license": "ISC",
-  "description": ""
+  "license": "ISC"
 }

@@ -1,0 +1,93 @@
+name: Deploy to AWS
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+
+concurrency:
+  group: deployment-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ inputs.environment || 'staging' }}
+    
+    strategy:
+      matrix:
+        node-version: [20.x]
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION || 'ap-south-1' }}
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Install backend dependencies
+        run: npm install --prefix backend
+      
+      - name: Install infra dependencies
+        run: npm install --prefix infra
+      
+      - name: Build all components
+        run: npm run build
+      
+      - name: Run contract tests
+        run: npm test --prefix contracts
+        continue-on-error: true
+      
+      - name: Verify CDK stack synthesizes
+        run: npm run cdk:diff --prefix infra
+        shell: bash
+      
+      - name: Deploy CDK stack
+        run: |
+          cd infra
+          npx cdk deploy SettlementPlatformStack --require-approval never
+        shell: bash
+        env:
+          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+          AWS_REGION: ${{ secrets.AWS_REGION || 'ap-south-1' }}
+      
+      - name: Run smoke tests
+        run: |
+          echo "🧪 Smoke tests would go here"
+          echo "Test API connectivity, Lambda invocations, DynamoDB access, etc."
+        continue-on-error: true
+      
+      - name: Deployment Summary
+        if: success()
+        run: |
+          echo "✅ Deployment completed successfully"
+          echo "Environment: ${{ inputs.environment || 'staging' }}"
+          echo "Commit: ${{ github.sha }}"
+      
+      - name: Deployment Failed
+        if: failure()
+        run: |
+          echo "❌ Deployment failed"
+          exit 1

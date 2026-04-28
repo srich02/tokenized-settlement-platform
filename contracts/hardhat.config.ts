@@ -7,10 +7,12 @@ dotenv.config({ path: "../.env" });
 export default defineConfig({
   plugins: [hardhatToolbox],
   solidity: {
+    type: "solc",
     version: "0.8.24",
+    preferWasm: true,
     settings: {
       optimizer: { enabled: true, runs: 200 },
-      evmVersion: "paris",
+      evmVersion: "cancun",
     },
   },
 });

@@ -1,0 +1,68 @@
+name: Build & Test
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [20.x]
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+      
+      - name: Install root dependencies
+        run: npm install
+      
+      - name: Install backend dependencies
+        run: npm install --prefix backend
+      
+      - name: Install contract dependencies
+        run: npm install --prefix contracts
+      
+      - name: Install infra dependencies
+        run: npm install --prefix infra
+      
+      - name: Build backend Lambda functions
+        run: npm run build:backend
+      
+      - name: Build smart contracts
+        run: npm run build:contracts
+      
+      - name: Build infrastructure CDK
+        run: npm run build:infra
+      
+      - name: Run contract tests
+        run: npm test --prefix contracts
+      
+      - name: Lint (optional)
+        run: |
+          npx eslint contracts/contracts/**/*.ts 2>/dev/null || echo "Linting optional"
+        continue-on-error: true
+      
+      - name: Archive build artifacts
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifacts
+          path: |
+            backend/dist
+            contracts/artifacts
+            infra/dist
+          retention-days: 7
+      
+      - name: Build Status Check
+        if: success()
+        run: echo "✅ Build and tests passed"

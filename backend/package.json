@@ -1,0 +1,22 @@
+{
+  "name": "@settlement/backend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Backend Lambda functions for settlement platform",
+  "scripts": {
+    "build": "esbuild settlement-orchestrator.ts compliance-checker.ts --bundle --format=esm --platform=node --outdir=dist",
+    "watch": "esbuild settlement-orchestrator.ts compliance-checker.ts --bundle --format=esm --platform=node --outdir=dist --watch"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^20",
+    "esbuild": "^0.20.0",
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.600.0",
+    "@aws-sdk/client-kms": "^3.600.0"
+  }
+}

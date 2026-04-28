@@ -1,0 +1,29 @@
+{
+  "name": "@settlement/infra",
+  "version": "1.0.0",
+  "description": "AWS CDK infrastructure for settlement platform",
+  "private": true,
+  "main": "dist/bin/main.js",
+  "scripts": {
+    "build": "tsc",
+    "cdk:synth": "cdk synth",
+    "cdk:deploy": "cdk deploy --require-approval never",
+    "cdk:destroy": "cdk destroy",
+    "cdk:diff": "cdk diff",
+    "cdk:list": "cdk list"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@types/node": "^25.6.0",
+    "aws-cdk": "^2.1119.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.3"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "^2.251.0",
+    "constructs": "^10.6.0"
+  }
+}
